@@ -6,7 +6,6 @@ import pandas as pd
 import matplotlib
 from matplotlib import pyplot as plt
 from tqdm import tqdm
-from scipy.stats import poisson
 
 
 matplotlib.use('TkAgg')
@@ -95,6 +94,18 @@ def sample_lego_pieces(random_sets, selected_sets, set_piece_prob_matrix, num_pi
     return lego_pieces_seen
 
 def expectation_maximization(lego_pieces_seen, set_piece_prob_matrix, epsilon=1e-4, max_iter=100000):
+    """
+    Perform Expectation-Maximization (EM) to estimate the mixture weights over LEGO sets.
+
+    Args:
+        lego_pieces_seen (list): List of observed LEGO piece indices.
+        set_piece_prob_matrix (ndarray): Matrix of piece probabilities for each set.
+        epsilon (float, optional): Convergence threshold for the change in mixture weights. Default is 1e-4.
+        max_iter (int, optional): Maximum number of iterations for the EM algorithm. Default is 100000.
+
+    Returns:
+        ndarray: Estimated mixture weights over the LEGO sets.
+    """
     num_sets, num_piece_types = set_piece_prob_matrix.shape
     pis = np.ones(num_sets) / num_sets  # TODO: maybe there are better ways to initialize?
 
@@ -117,6 +128,19 @@ def expectation_maximization(lego_pieces_seen, set_piece_prob_matrix, epsilon=1e
 
     return pis
 def gibbs_sampling(lego_pieces_seen, set_piece_prob_matrix, num_sets, alpha=1, iterations=1000):
+    """
+    Perform Gibbs sampling to estimate the mixture weights over LEGO sets.
+
+    Args:
+        lego_pieces_seen (list): List of observed LEGO piece indices.
+        set_piece_prob_matrix (ndarray): Matrix of piece probabilities for each set.
+        num_sets (int): Number of LEGO sets.
+        alpha (float, optional): Dirichlet prior parameter. Default is 1.
+        iterations (int, optional): Number of iterations for the sampling process. Default is 1000.
+
+    Returns:
+        tuple: Estimated mixture weights over the LEGO sets and the assignments of pieces to sets.
+    """
     num_pieces = len(lego_pieces_seen)
     z = np.random.choice(num_sets, size=num_pieces)
     pis = np.random.dirichlet(np.ones(num_sets)*alpha)
@@ -162,6 +186,20 @@ def calculate_log_prior(theta, lam=1.0):
 
 
 def metropolis_hastings(lego_pieces_seen, set_piece_prob_matrix, num_sets, adapt, iterations=100000, eps=0.5):
+    """
+    Perform Metropolis-Hastings sampling to estimate the mixture weights over LEGO sets.
+
+    Args:
+        lego_pieces_seen (list): List of observed LEGO piece indices.
+        set_piece_prob_matrix (ndarray): Matrix of piece probabilities for each set.
+        num_sets (int): Number of LEGO sets.
+        adapt (bool): Whether to adapt the step size during sampling.
+        iterations (int, optional): Number of iterations for the sampling process. Default is 100000.
+        eps (float, optional): Initial step size for the proposal distribution. Default is 0.5.
+
+    Returns:
+        ndarray: Estimated mixture weights over the LEGO sets.
+        """
     # calculate likelihood and prior
     theta = np.random.rand(num_sets)
     theta = np.clip(theta, 0, None)
